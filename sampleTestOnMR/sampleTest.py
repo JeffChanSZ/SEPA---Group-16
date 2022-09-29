@@ -20,33 +20,72 @@ def runWithModel(twitter_data, model, labelName):
         tweet = twitter_data[i]
         result = sentiment_analysis(tweet["Comments"])
         result[0]["twitter_id"] = tweet["TweetID"] # result is a type of list, result[0] is a type of dict
+        ##############################
+        # only for MR1 and MR2
+        # comment out below line when running other MRs
+        result[0]["Comments"] = tweet["Comments"] 
+        ##############################
         sentiment_results.append(result[0])
 
     df = pd.DataFrame(sentiment_results)
     df.rename(columns= {"label" : labelName}, inplace=True) #rename the column name for different MRs label output
     return df 
 
+labels = {
+    "negative": ["negative","1 star","2 stars","neg","label_0"],
+    "neutral": ["neutral","3 stars","neu","label_1"],
+    "positive": ["positive","4 stars","5 stars","pos","label_2"]
+}
+
+def convert_label(label):
+    label = label.lower()
+
+    if label in labels["negative"]:
+        label = "n"
+    elif label in labels["neutral"]:
+        label = "m"
+    elif label in labels["positive"]:
+        label = "p"
+    return label
+
 # First MR, which adds a positive statement
 # Add a positive sentiment to all samples, then all previously positive samples will be checked
-def MR1(twitter_data, model):
+def MR1(twitter_data, original_df, model):
+    new_label_list = []
+    for x in original_df['original_label']:
+        # Convert the label to "n", "m" or "p"
+        new_label = convert_label(x) 
+        new_label_list.append(new_label)
+
+    # Replace the old column data to new labels 
+    original_df['original_label'] = new_label_list
+
     # Collect repository of statements that can be added randomly
-    pos_df = twitter_data[twitter_data[""] == "p"]
+    pos_df = original_df[original_df["original_label"] == "p"]
 
     for i in twitter_data:
-        r_int = random.randint(0, len(pos_df))
-        i['Comments'] = i['Comments'] + pos_df["comments"].iloc[r_int] # add a random positive statement to each comment
-
-        #i['Comments'] = i['Comments'] + " I like it."
+        r_int = random.randint(0, (len(pos_df) - 1)) # len minus 1 to prevent "Indexing is out of bounds" error
+        i['Comments'] = i['Comments'] + pos_df["Comments"].iloc[r_int] # add a random positive statement to each comment
+        
     return runWithModel(twitter_data, model, "MR1_label") # return MR1 df
 
 # Second MR, which adds a negative statement
-def MR2(twitter_data, model):
+def MR2(twitter_data, original_df, model):
+    new_label_list = []
+    for x in original_df['original_label']:
+        # Convert the label to "n", "m" or "p"
+        new_label = convert_label(x) 
+        new_label_list.append(new_label)
+
+    # Replace the old column data to new labels 
+    original_df['original_label'] = new_label_list
+
     # Collect repository of statements that can be added randomly
-    neg_df = twitter_data[twitter_data[""] == "n"]
+    neg_df = original_df[original_df["original_label"] == "n"]
 
     for i in twitter_data:
-        r_int = random.randint(0, len(neg_df))
-        i['Comments'] = i['Comments'] + neg_df["comments"].iloc[r_int] # add a random negative statement to each comment
+        r_int = random.randint(0, (len(neg_df) - 1)) # len minus 1 to prevent "Indexing is out of bounds" error
+        i['Comments'] = i['Comments'] + neg_df["Comments"].iloc[r_int] # add a random negative statement to each comment
 
         #i['Comments'] = i['Comments'] + " I don't like it."
     return runWithModel(twitter_data, model, "MR2_label") # return MR2 df
@@ -142,12 +181,12 @@ if __name__ == '__main__':
 
     # Run original model against sentiment model
     originalDF = runWithModel(twitter_data, model, "original_label")
-    print(originalDF)
+    # print(originalDF)
     
     # Run sentiment model against MRs 
-    mr1DF = MR1(twitter_data, model)
+    mr1DF = MR1(twitter_data, originalDF, model)
     print(mr1DF)
-    mr2DF = MR2(twitter_data, model)
+    mr2DF = MR2(twitter_data, originalDF, model)
     print(mr2DF)
     mr3DF = MR3(twitter_data, model)
     print(mr3DF)
