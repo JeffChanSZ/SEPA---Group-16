@@ -7,6 +7,7 @@ import pandas as pd
 from ast import literal_eval
 import time
 import json
+#import xlrd
 from datetime import datetime
 from dateutil.parser import parse
 from dateutil.tz import gettz
@@ -89,8 +90,22 @@ class models(object):
 		#declare the header for each column in csv file
 		column_name = ["Scale", "TweetID", "Date", "Query", "User", "Comments"]
 
-		df = pd.read_csv(fileDeets[0], names=column_name, encoding='latin-1')
+		if fileDeets[1] == "Comma Seperated Values (*.csv)":
+			df = pd.read_csv(fileDeets[0], names=column_name, encoding='latin-1')
 		# tweet = df.Comments.to_list() #make the column to a list of string
+
+
+		#Below is partial code for .xlsx and .xls reading. It will require additional dependancies, probably xlrd and openpyxl
+
+		#elif fileDeets[1] == "Excel Workbook File (*.xlsx)" or fileDeets[1] == "Excel 97-03 File (*.xls)":
+		#	wb = xlrd.open_workbook(fileDeets[0], encoding_override='latin1')
+		#	df = pd.read_excel(wb)
+		#
+		#elif fileDeets[1] == "Hash Seperated Values (*.hsv)":
+		#	
+
+		else:
+			print("Error in input file format")
 
 		#Added date
 		twitter_data = df[['TweetID', 'Comments', 'Date']].to_dict(orient='records')

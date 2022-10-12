@@ -17,11 +17,9 @@ class Main(QMainWindow):
         wid=MyWidget(data)
         wid.setMinimumWidth(600)
         graphs=QHBoxLayout()
+
         graphs.addWidget(wid)
-        if self.Hlayout.count()>1:
-            self.Hlayout.takeAt(1)
-        
-        self.Hlayout.addLayout(graphs)
+        self.Hlayout.addLayout(graphs,4)
 
 
     def __init__(self):
@@ -104,7 +102,7 @@ class Main(QMainWindow):
 
         self.date1Text = QLineEdit(self)
         self.date1Text.setInputMask("99/99/99;")
-        self.date1Text.setText("01/04/09;")
+        self.date1Text.setText("01/01/22;")
         self.date1Text.setMaximumWidth(110)
 
         self.date2Lbl = QLabel(self)
@@ -112,7 +110,7 @@ class Main(QMainWindow):
 
         self.date2Text = QLineEdit(self)
         self.date2Text.setInputMask("99/99/99;")
-        self.date2Text.setText("01/07/09;")
+        self.date2Text.setText("01/05/22;")
         self.date2Text.setMaximumWidth(95)
 
         self.filterLbl = QLabel(self, objectName="rowLbl")
@@ -230,7 +228,7 @@ class Main(QMainWindow):
         widget.setLayout(self.Hlayout)
 
     def getFile(self):
-        fileFilter = 'Comma Seperated Values (*.csv);;Hash Seperated Values (*.hsv);; Excel File (*.xlsx, *xls)'
+        fileFilter = 'Comma Seperated Values (*.csv);;Hash Seperated Values (*.hsv);;Excel Workbook File (*.xlsx);;Excel 97-03 File (*.xls)'
         #Filedeets is tuple. [0] is filename and [1] is file type
         self.fileDeets = QFileDialog.getOpenFileName(
             parent = self,
