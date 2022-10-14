@@ -13,13 +13,16 @@ class Main(QMainWindow):
     def showResult(self):
         getdata=getResults()
         data = getdata.read_data("output.csv")
+        if data == None:
+            self.warningLbl.setText("No results matching filter criteria")
+        else:
+            print(data)
+            wid=MyWidget(data)
+            wid.setMinimumWidth(600)
+            graphs=QHBoxLayout()
 
-        wid=MyWidget(data)
-        wid.setMinimumWidth(600)
-        graphs=QHBoxLayout()
-
-        graphs.addWidget(wid)
-        self.Hlayout.addLayout(graphs,4)
+            graphs.addWidget(wid)
+            self.Hlayout.addLayout(graphs,4)
 
 
     def __init__(self):
@@ -68,7 +71,7 @@ class Main(QMainWindow):
         self.nlpLbl.setMinimumSize(110, 40)
 
         self.nlpModel = QComboBox(self)
-        self.nlpModel.addItems(["Nlptown", "Siebert", "Finiteautomata", "Cardiffnlp", "Seethal", "DaNLP"])
+        self.nlpModel.addItems(["Nlptown", "Finiteautomata", "Cardiffnlp", "Seethal"])
 
         self.fileLoadLbl = QLabel(self, objectName="rowLbl")
         self.fileLoadLbl.setText("Load Data From")

@@ -25,13 +25,16 @@ class getResults(object):
     def read_data(self, fname):
         # Read the CSV content
         df = pd.read_csv(fname)
-        # Remove wrong magnitudes
-        df['date'] = df['date'].str[:10]
-        df= df.groupby('date', as_index=False).mean()
-        dates = df["date"].apply(lambda x: self.date(x))
-        sentiment=df["scale"].apply(lambda x: round(x,3))
-        # My local timezone
+        if (len(df)) == 0:
+            return
+        else:
+            # Remove wrong magnitudes
+            df['date'] = df['date'].str[:10]
+            df= df.groupby('date', as_index=False).mean()
+            dates = df["date"].apply(lambda x: self.date(x))
+            sentiment=df["scale"].apply(lambda x: round(x,3))
+            # My local timezone
 
-        # Get timestamp transformed to our timezone
+            # Get timestamp transformed to our timezone
 
         return dates, sentiment

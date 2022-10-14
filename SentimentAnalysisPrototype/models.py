@@ -72,16 +72,16 @@ class models(object):
 		#Check which model is needed
 		if nlpModel == "Nlptown":
 			model = "nlptown/bert-base-multilingual-uncased-sentiment"
-		elif nlpModel == "Siebert":
-			model = "siebert/sentiment-roberta-large-english"
+#		elif nlpModel == "Siebert":
+#			model = "siebert/sentiment-roberta-large-english"
 		elif nlpModel == "Finiteautomata":
 			model = "finiteautomata/bertweet-base-sentiment-analysis"
 		elif nlpModel == "Cardiffnlp":
 			model = "cardiffnlp/twitter-roberta-base-sentiment-latest"
 		elif nlpModel == "Seethal":
 			model = "Seethal/sentiment_analysis_generic_dataset"
-		elif nlpModel == "DaNLP":
-			model = "DaNLP/da-bert-tone-sentiment-polarity"
+#		elif nlpModel == "DaNLP":
+#			model = "DaNLP/da-bert-tone-sentiment-polarity"
 
 		#conduct sentiment analysis model
 		sentiment_analysis = pipeline("sentiment-analysis",model=model)
@@ -158,6 +158,7 @@ class models(object):
 						print (tweet["TweetID"],tweet["Comments"], " filtered")
 						continue
 				#print (tweet["TweetID"],tweet["Comments"], " not filtered")
+
 
 				result = sentiment_analysis(tweet["Comments"])
 				result[0]["twitter_id"] = tweet["TweetID"]
