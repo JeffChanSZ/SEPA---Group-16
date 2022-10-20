@@ -323,8 +323,8 @@ class Main(QMainWindow):
                 endDate = datetime.strptime(self.date2Text.text(), "%d/%m/%y").date()
         #Or converts time period to a date
         else:
-            
             #JC
+
             fromDate=self.getStartDate()
 
             if fromDate==NULL:
@@ -349,7 +349,6 @@ class Main(QMainWindow):
             endDate=(fromDate+dateGap)
         try:
             #if startdate less than end date throw exception
-
             #JC
             print('File Process is ', self.fileDeets[0], '\n')
 

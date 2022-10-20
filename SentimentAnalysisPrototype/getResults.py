@@ -42,7 +42,7 @@ class getResults(object):
         # Read the CSV content
         df = pd.read_csv(fname)
         
-        #JCC
+        #JC
         if df.empty :
             print('Warning! DataFrame is Empty\n')
             self.showdialog('DataFrame Empty!')
