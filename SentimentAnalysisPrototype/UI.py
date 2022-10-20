@@ -1,3 +1,4 @@
+from asyncio.windows_events import NULL
 from PySide6 import QtWidgets
 from PySide6.QtWidgets import QApplication,QSizePolicy, QMainWindow, QSpacerItem,QFileDialog, QLineEdit, QLabel, QPushButton, QBoxLayout, QVBoxLayout, QHBoxLayout, QWidget, QComboBox, QCheckBox, QTextEdit, QSpinBox
 import sys
@@ -5,24 +6,35 @@ import os
 from datetime import datetime, timedelta
 from PySide6.QtCore import Qt
 from MyWidget import MyWidget
+
+#JC
+from PySide6.QtWidgets import QMessageBox
+
 from getResults import getResults
 from models import models
 import shutil
+
+#JC
+import pandas as pd
+import numpy as np
+import time
+from datetime import datetime
+from dateutil.parser import parse
+from dateutil.tz import gettz
 
 class Main(QMainWindow): 
     def showResult(self):
         getdata=getResults()
         data = getdata.read_data("output.csv")
-        if data == None:
-            self.warningLbl.setText("No results matching filter criteria")
-        else:
-            print(data)
-            wid=MyWidget(data)
-            wid.setMinimumWidth(600)
-            graphs=QHBoxLayout()
 
-            graphs.addWidget(wid)
-            self.Hlayout.addLayout(graphs,4)
+        wid=MyWidget(data)
+        wid.setMinimumWidth(600)
+        graphs=QHBoxLayout()
+        graphs.addWidget(wid)
+        if self.Hlayout.count()>1:
+            self.Hlayout.takeAt(1)
+        
+        self.Hlayout.addLayout(graphs)
 
 
     def __init__(self):
@@ -71,7 +83,7 @@ class Main(QMainWindow):
         self.nlpLbl.setMinimumSize(110, 40)
 
         self.nlpModel = QComboBox(self)
-        self.nlpModel.addItems(["Nlptown", "Finiteautomata", "Cardiffnlp", "Seethal"])
+        self.nlpModel.addItems(["Nlptown", "Siebert", "Finiteautomata", "Cardiffnlp", "Seethal", "DaNLP"])
 
         self.fileLoadLbl = QLabel(self, objectName="rowLbl")
         self.fileLoadLbl.setText("Load Data From")
@@ -105,7 +117,7 @@ class Main(QMainWindow):
 
         self.date1Text = QLineEdit(self)
         self.date1Text.setInputMask("99/99/99;")
-        self.date1Text.setText("01/01/22;")
+        self.date1Text.setText("01/04/09;")
         self.date1Text.setMaximumWidth(110)
 
         self.date2Lbl = QLabel(self)
@@ -113,7 +125,7 @@ class Main(QMainWindow):
 
         self.date2Text = QLineEdit(self)
         self.date2Text.setInputMask("99/99/99;")
-        self.date2Text.setText("01/05/22;")
+        self.date2Text.setText("01/07/09;")
         self.date2Text.setMaximumWidth(95)
 
         self.filterLbl = QLabel(self, objectName="rowLbl")
@@ -231,7 +243,7 @@ class Main(QMainWindow):
         widget.setLayout(self.Hlayout)
 
     def getFile(self):
-        fileFilter = 'Comma Seperated Values (*.csv);;Hash Seperated Values (*.hsv);;Excel Workbook File (*.xlsx);;Excel 97-03 File (*.xls)'
+        fileFilter = 'Comma Seperated Values (*.csv);;Hash Seperated Values (*.hsv);; Excel File (*.xlsx, *xls)'
         #Filedeets is tuple. [0] is filename and [1] is file type
         self.fileDeets = QFileDialog.getOpenFileName(
             parent = self,
@@ -251,6 +263,41 @@ class Main(QMainWindow):
             caption = 'Save File...',
             dir = local)
         shutil.copy(local + "\\output.csv", dest[0])
+
+    
+    #JC
+    def showdialog(self, text):
+       msg = QMessageBox()
+       msg.setIcon(QMessageBox.Warning)
+
+       msg.setText(text)
+       msg.setWindowTitle("Warning")
+       msg.setStandardButtons(QMessageBox.Ok)
+       retval = msg.exec_()
+       print("value of pressed message box button:", retval)
+    
+        
+    #JC
+    def convertDate(self,t):
+        tzInfo = {"PDT": gettz("US/Pacific")}
+        return parse(t, tzinfos=tzInfo)
+
+    #JC
+    def getStartDate(self):
+        column_name = ["Scale", "TweetID", "Date", "Query", "User", "Comments"]
+        if hasattr(self, 'fileDeets') == False:
+            print("fileDeet is not set")
+            self.showdialog('Please Select a file first')
+            return NULL
+        df=pd.read_csv(self.fileDeets[0],names=column_name, encoding='latin-1')
+        df=df['Date'].copy()
+        dates=df.to_numpy()
+        applyall = np.vectorize(self.convertDate)
+        dates = applyall(dates)
+        startDate=dates.min()
+        print('startDate found=', startDate)
+        return startDate.date()
+
 
     def generate(self):
         #If time needed, remove .date()
@@ -276,7 +323,14 @@ class Main(QMainWindow):
                 endDate = datetime.strptime(self.date2Text.text(), "%d/%m/%y").date()
         #Or converts time period to a date
         else:
-            endDate = datetime.today().date()
+            
+            #JC
+            fromDate=self.getStartDate()
+
+            if fromDate==NULL:
+                raise Exception("Pick a file first")
+            
+            #endDate = datetime.today().date()
             timeNum = int(self.timeText.text())
             if self.timePeriod.currentText() == "Days":
                 dateGap = timedelta(days=timeNum)
@@ -289,9 +343,16 @@ class Main(QMainWindow):
             elif self.timePeriod.currentText() == "Years":
                 timeNum  = timeNum*52
                 dateGap = timedelta(weeks=timeNum)
-            fromDate = (endDate - dateGap)
+
+            #JC
+            #fromDate = (endDate - dateGap)
+            endDate=(fromDate+dateGap)
         try:
             #if startdate less than end date throw exception
+
+            #JC
+            print('File Process is ', self.fileDeets[0], '\n')
+
             if endDate < fromDate:
                 self.warningLbl.setText("The starting date cannot be later than the end date")
             #TODO: Data processing here? convert Include/Exclude to one variable, 
