@@ -1,9 +1,11 @@
+from copy import deepcopy
 import pandas as pd
 from transformers import pipeline
 import csv
 import random
 import re
 from functools import reduce
+import copy
 
 
 # function to run sentiment model using passed data, model, and label name
@@ -14,21 +16,21 @@ def runWithModel(twitter_data, model, labelName):
 
     #conduct sentiment analysis model
     sentiment_analysis = pipeline("sentiment-analysis",model=model)
-
+    
     qty = int(qty)
     for i in range(0, qty):
         tweet = twitter_data[i]
         result = sentiment_analysis(tweet["Comments"])
         result[0]["twitter_id"] = tweet["TweetID"] # result is a type of list, result[0] is a type of dict
-        ##############################
-        # only for MR1 and MR2
-        # comment out below line when running other MRs
+        
         result[0]["Comments"] = tweet["Comments"] 
-        ##############################
+        # print(result[0])
+        
         sentiment_results.append(result[0])
 
     df = pd.DataFrame(sentiment_results)
     df.rename(columns= {"label" : labelName}, inplace=True) #rename the column name for different MRs label output
+
     return df 
 
 labels = {
@@ -62,12 +64,13 @@ def MR1(twitter_data, original_df, model):
 
     # Collect repository of statements that can be added randomly
     pos_df = original_df[original_df["original_label"] == "p"]
-
-    for i in twitter_data:
+    temp = twitter_data.copy()
+    mr1data = copy.deepcopy(twitter_data)
+    for i in mr1data:
         r_int = random.randint(0, (len(pos_df) - 1)) # len minus 1 to prevent "Indexing is out of bounds" error
         i['Comments'] = i['Comments'] + pos_df["Comments"].iloc[r_int] # add a random positive statement to each comment
         
-    return runWithModel(twitter_data, model, "MR1_label") # return MR1 df
+    return runWithModel(mr1data, model, "MR1_label") # return MR1 df
 
 # Second MR, which adds a negative statement
 def MR2(twitter_data, original_df, model):
@@ -82,29 +85,38 @@ def MR2(twitter_data, original_df, model):
 
     # Collect repository of statements that can be added randomly
     neg_df = original_df[original_df["original_label"] == "n"]
-
-    for i in twitter_data:
+    temp = twitter_data.copy()
+    mr2data = copy.deepcopy(twitter_data)
+    for i in mr2data:
         r_int = random.randint(0, (len(neg_df) - 1)) # len minus 1 to prevent "Indexing is out of bounds" error
         i['Comments'] = i['Comments'] + neg_df["Comments"].iloc[r_int] # add a random negative statement to each comment
 
         #i['Comments'] = i['Comments'] + " I don't like it."
-    return runWithModel(twitter_data, model, "MR2_label") # return MR2 df
+    return runWithModel(mr2data, model, "MR2_label") # return MR2 df
 
 # Third MR, which adds a positive emoticon
 def MR3(twitter_data, model):
-    for i in twitter_data:
+    temp = twitter_data.copy()
+    mr3data = copy.deepcopy(twitter_data)
+    for i in mr3data:
         i['Comments'] = i['Comments'] + " :)"
-    return runWithModel(twitter_data, model, "MR3_label") # return MR3 df
+    # print(twitter_data)
+    return runWithModel(mr3data, model, "MR3_label") # return MR3 df
 
 # Fourth MR, which adds a negative emoticon
 def MR4(twitter_data, model):
-    for i in twitter_data:
+    temp = twitter_data.copy()
+    mr4data = copy.deepcopy(twitter_data)
+    for i in mr4data:
         i['Comments'] = i['Comments'] + " :("
-    return runWithModel(twitter_data, model, "MR4_label") # return MR4 df
+    # print(twitter_data)
+    return runWithModel(mr4data, model, "MR4_label") # return MR4 df
 
 # Fifth MR, which removes repeating characters after 2+ repeats
 def MR5(twitter_data, model):
-    for i in twitter_data:
+    temp = twitter_data.copy()
+    mr5data = copy.deepcopy(twitter_data)
+    for i in mr5data:
         num_occur = 1
         str = i["Comments"]
         prev = ""
@@ -119,11 +131,13 @@ def MR5(twitter_data, model):
             new_s += chr
             prev = chr
         i["Comments"] = new_s
-    return runWithModel(twitter_data, model, "MR5_label")
+    return runWithModel(mr5data, model, "MR5_label")
 
 # Sixth MR, which removes repetitions of exclamation marks
 def MR6(twitter_data, model):
-    for i in twitter_data:
+    temp = twitter_data.copy()
+    mr6data = copy.deepcopy(twitter_data)
+    for i in mr6data:
         str = i["Comments"]
         prev = ""
         new_s = ""
@@ -133,33 +147,39 @@ def MR6(twitter_data, model):
             new_s += chr
             prev = chr
         i["Comments"] = new_s
-    return runWithModel(twitter_data, model, "MR6_label")
+    return runWithModel(mr6data, model, "MR6_label")
 
 # Seventh MR, which replaces twitter usernames with a default tag
 def MR7(twitter_data, model):
-    for i in twitter_data:
+    temp = twitter_data.copy()
+    mr7data = copy.deepcopy(twitter_data)
+    for i in mr7data:
         i["Comments"] = re.sub(r'\@\w+', '@twitteruser', i["Comments"])  # replace any word starting with @ with @twitteruser
-    return runWithModel(twitter_data, model, "MR7_label")
+    return runWithModel(mr7data, model, "MR7_label")
 
 # Eigth MR, which removes instances of "lol", "lmao", and "omg"
 def MR8(twitter_data, model):
-    for i in twitter_data:
+    temp = twitter_data.copy()
+    mr8data = copy.deepcopy(twitter_data)
+    for i in mr8data:
         str = i["Comments"]
         new_s = str.replace('lol', '')  # replace all "lol" phrases wth empty space
         new_s = new_s.replace('lmao', '')  # replace all "lmao" phrases wth empty space
         new_s = new_s.replace('omg', '')  # replace all "omg" phrases wth empty space
         i["Comments"] = new_s
-    return runWithModel(twitter_data, model, "MR8_label")
+    return runWithModel(mr8data, model, "MR8_label")
 
 # Ninth MR, which randomly shuffles a string
 def MR9(twitter_data, model):
-    for i in twitter_data:
+    temp = twitter_data.copy()
+    mr9data = copy.deepcopy(twitter_data)
+    for i in mr9data:
         str = i["Comments"]
         words = str.split()  # Split string into array of words
         random.shuffle(words)  # Randomly shuffle position of array words
         new_s = ' '.join(words)  # Re-join array into new string
         i["Comments"] = new_s
-    return runWithModel(twitter_data, model, "MR9_label")
+    return runWithModel(mr9data, model, "MR9_label")
 
 
 
@@ -184,10 +204,7 @@ if __name__ == '__main__':
     # print(originalDF)
     
     # Run sentiment model against MRs 
-    mr1DF = MR1(twitter_data, originalDF, model)
-    print(mr1DF)
-    mr2DF = MR2(twitter_data, originalDF, model)
-    print(mr2DF)
+    
     mr3DF = MR3(twitter_data, model)
     print(mr3DF)
     mr4DF = MR4(twitter_data, model)
@@ -202,6 +219,10 @@ if __name__ == '__main__':
     print(mr8DF)
     mr9DF = MR9(twitter_data, model)
     print(mr9DF)
+    mr1DF = MR1(twitter_data, originalDF, model)
+    print(mr1DF)
+    mr2DF = MR2(twitter_data, originalDF, model)
+    print(mr2DF)
 
     # Merge all dataframes together
     data_frames = [originalDF, mr1DF, mr2DF, mr3DF, mr4DF, mr5DF, mr6DF, mr7DF, mr8DF, mr9DF]
