@@ -85,7 +85,7 @@ class Main(QMainWindow):
         self.nlpLbl.setMinimumSize(110, 40)
 
         self.nlpModel = QComboBox(self)
-        self.nlpModel.addItems(["Nlptown", "Siebert", "Finiteautomata", "Cardiffnlp", "Seethal", "DaNLP"])
+        self.nlpModel.addItems(["Nlptown", "Finiteautomata", "Cardiffnlp", "Seethal"])
 
         self.fileLoadLbl = QLabel(self, objectName="rowLbl")
         self.fileLoadLbl.setText("Load Data From")
@@ -276,9 +276,9 @@ class Main(QMainWindow):
     #JC
     def showSentimentAnalysisResult(self,myresult):
         print('showSentimentAnalysisResult called')
-        self.totalRowCount.setText('Total Row Processed:{0} '.format(myresult.totalRow))
-        self.actualResult.setText('True Positive:{0}  True Negative:{1}'.format( myresult.truePositive,myresult.trueNegative))
-        self.predictedResult.setText('Predicted Positive:{0}  Predicted Negative:{1} Predicted Neutral:{2}'.format( myresult.predictedPositive,myresult.predictedNegative,myresult.predictedNeutral))
+        self.totalRowCount.setText('Total Row Processed: {0} '.format(myresult.totalRow))
+        self.actualResult.setText('Original Dataset -- Positive: {0}  Negative: {1}'.format( myresult.truePositive,myresult.trueNegative))
+        self.predictedResult.setText('Processed Dataset -- Positive: {0}  Negative: {1}  Neutral: {2}'.format( myresult.predictedPositive,myresult.predictedNegative,myresult.predictedNeutral))
         
 
     def getFile(self):

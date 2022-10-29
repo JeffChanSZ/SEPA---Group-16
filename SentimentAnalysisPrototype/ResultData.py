@@ -1,9 +1,9 @@
 
-#TCM2
+#JC
 #from sklearn.metrics import roc_auc_score, confusion_matrix,f1_score
 
 
-#TCM2
+#JC
 class ResultData(object):
       def __init__(self):
           self.cm=confusion_matrix()

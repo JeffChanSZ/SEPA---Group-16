@@ -1,4 +1,5 @@
 from tkinter import N
+from tkinter import N
 from numpy import dtype
 from transformers import pipeline
 import csv
