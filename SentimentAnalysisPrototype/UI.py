@@ -22,6 +22,8 @@ from datetime import datetime
 from dateutil.parser import parse
 from dateutil.tz import gettz
 
+import ResultData
+
 class Main(QMainWindow): 
     def showResult(self):
         getdata=getResults()
@@ -240,7 +242,44 @@ class Main(QMainWindow):
         self.vLayout.addLayout(self.row7)
         self.Hlayout.addLayout(self.vLayout)
         
+        #JC
+        self.row8 = QHBoxLayout()
+        self.totalRowCount = QLabel(self)
+        self.row8.addWidget(self.totalRowCount)
+        self.totalRowCount.setText('')
+        self.row8.addStretch()
+        self.vLayout.addLayout(self.row8)
+
+        self.row9 = QHBoxLayout()
+        self.actualResult = QLabel(self)
+        self.row9.addWidget(self.actualResult)
+        self.actualResult.setText('')
+        self.row9.addStretch()
+        self.vLayout.addLayout(self.row9)
+
+        self.row10 = QHBoxLayout()
+        self.predictedResult = QLabel(self)
+        self.row10.addWidget(self.predictedResult)
+        self.predictedResult.setText('')
+        self.row10.addStretch()
+        self.vLayout.addLayout(self.row10)
+
+        self.row11 = QHBoxLayout()
+        self.vLayout.addLayout(self.row11)
+
+        #JC
+        self.vLayout.addLayout(self.row7)
+
+        self.Hlayout.addLayout(self.vLayout)
         widget.setLayout(self.Hlayout)
+
+    #JC
+    def showSentimentAnalysisResult(self,myresult):
+        print('showSentimentAnalysisResult called')
+        self.totalRowCount.setText('Total Row Processed:{0} '.format(myresult.totalRow))
+        self.actualResult.setText('True Positive:{0}  True Negative:{1}'.format( myresult.truePositive,myresult.trueNegative))
+        self.predictedResult.setText('Predicted Positive:{0}  Predicted Negative:{1} Predicted Neutral:{2}'.format( myresult.predictedPositive,myresult.predictedNegative,myresult.predictedNeutral))
+        
 
     def getFile(self):
         fileFilter = 'Comma Seperated Values (*.csv);;Hash Seperated Values (*.hsv);; Excel File (*.xlsx, *xls)'
@@ -359,8 +398,19 @@ class Main(QMainWindow):
                 self.warningLbl.setText(" ")
                 #Model (Can get text or index)  , File tuple    ,start date,end date, Include filter? (True/False)     , Exclude filter? (True/False)    , include words,   exclude words       
                 print(self.nlpModel.currentText(), self.fileDeets, fromDate, endDate, self.filterCheckInclude.isChecked(), self.filterCheckExclude.isChecked(),  self.includeText.toPlainText(), self.excludeText.toPlainText())
-                self.model.run(self.nlpModel.currentText(), self.fileDeets, fromDate, endDate, self.filterCheckInclude.isChecked(), self.filterCheckExclude.isChecked(),  self.includeText.toPlainText(),self.excludeText.toPlainText())
+
+                #JC
+                self.myresult=ResultData
+
+
+                #self.model.run(self.nlpModel.currentText(), self.fileDeets, fromDate, endDate, self.filterCheckInclude.isChecked(), self.filterCheckExclude.isChecked(),  self.includeText.toPlainText(),self.excludeText.toPlainText())
+                #JC
+                self.model.run(self.nlpModel.currentText(), self.fileDeets, fromDate, endDate, self.filterCheckInclude.isChecked(), self.filterCheckExclude.isChecked(),  self.includeText.toPlainText(),self.excludeText.toPlainText(),self.myresult)
                 self.showResult()
+               
+                #JC
+                print('TRUE POSITIVE=',self.myresult.truePositive)
+                self.showSentimentAnalysisResult(self.myresult)
 
         except AttributeError as e:
             print(e)

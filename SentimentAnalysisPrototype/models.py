@@ -12,6 +12,11 @@ from datetime import datetime
 from dateutil.parser import parse
 from dateutil.tz import gettz
 
+#JC
+import numpy as np
+import ResultData
+#from sklearn.metrics import roc_auc_score, confusion_matrix,f1_score
+
 #Converted to object but dont need to
 class models(object):
 	def __init__(self):
@@ -58,8 +63,29 @@ class models(object):
 				result["scale"] = 4
 
 		return result
+        
+        #JC
+	def setResult(self,dataframe,sentiment_results):
+		print('setResult called')
+		t=ResultData
+		df = dataframe[['Scale','Comments']].copy()
+		target_map = {4:1,0:0}
+		df['target']=df['Scale'].map(target_map)
+		t.totalRow=len(df)
+		t.truePositive=len(df[df.target != 0]) 
+		t.trueNegative=t.totalRow-t.truePositive
+		texts=df['Comments'].tolist()
+		positive = filter(lambda e: e['label'].upper() == 'POSITIVE', sentiment_results)
+		negative=filter(lambda e: e['label'].upper() == 'NEGATIVE', sentiment_results)
+		neutral=filter(lambda e: e['label'].upper() == 'NEUTRAL', sentiment_results)
+		t.predictedPositive=len(list(positive))
+		t.predictedNegative=len(list(negative))
+		t.predictedNeutral=len(list(neutral))
+		return t
 
-	def run(self, nlpModel, fileDeets, fromDate, endDate, include, exclude, includeFilter, excludeFilter):
+	#JC
+	#def run(self, nlpModel, fileDeets, fromDate, endDate, include, exclude, includeFilter, excludeFilter):
+	def run(self, nlpModel, fileDeets, fromDate, endDate, include, exclude, includeFilter, excludeFilter, testresult):
 		print("Working pls w8. Loading ", nlpModel)
 		#Here are some choices for models
 		#1. nlptown/bert-base-multilingual-uncased-sentiment
@@ -177,7 +203,9 @@ class models(object):
 				print(new_result)
 				sentiment_results.append(new_result)
 
-		print(sentiment_results) # print the sentiment result
+		#print(sentiment_results) # print the sentiment result
+		#JC
+		testresult=self.setResult(df,sentiment_results);
 
 		with open("output.csv","w",newline="") as f:  # write to csv file
 			title = "label,score,twitter_id,date,scale".split(",") # quick hack
