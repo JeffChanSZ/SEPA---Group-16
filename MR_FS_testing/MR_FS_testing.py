@@ -5,33 +5,6 @@
 import pandas as pd
 
 
-def print_hi():
-    # Use a breakpoint in the code line below to debug your script.
-    column_name = ["Scale", "TweetID", "Date", "Query", "User", "Comments"]
-
-    df = pd.read_csv("input.csv", names=column_name, encoding='latin-1')
-    df['Comments'] = 'str: '+df['Comments']
-    df.to_csv('str.csv')
-def new():
-    column_name = ["Scale", "TweetID", "Date", "Query", "User", "Comments"]
-    df = pd.read_csv("data.csv", names=column_name, encoding='latin-1')
-    df['Comments']=df['Comments'].str.replace("omg|lol|lmao|OMG|LOL|LMAO","").str.strip()
-    df.to_csv('MR1.csv')
-
-def new1():
-    column_name = ["Scale", "TweetID", "Date", "Query", "User", "Comments"]
-    df = pd.read_csv("data.csv", names=column_name, encoding='latin-1')
-    df['Comments'] = df["Comments"].str.replace(r'.*(\w)\1', "").str.strip()
-    df.to_csv('MR2.csv')
-
-def test():
-    df = pd.read_csv("old files/test cardif.csv", encoding='latin-1')
-    df['str violation'] = df['label_str']==df['label']
-    df['upper violation'] = df['label_upper']==df['label']
-    print(df['str violation'].value_counts())
-    print(df['upper violation'].value_counts())
-
-    df.to_csv('test_output_cardif.csv')
 
 def fs():
     df = pd.read_csv("sentimentrating.csv", encoding='latin-1')
